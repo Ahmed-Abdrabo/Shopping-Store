@@ -2,9 +2,9 @@
 using RabbitMQ.Client;
 using System.Text;
 
-namespace Mango.Services.AuthAPI.RabbitMQSender
+namespace Mango.Services.OrderAPI.RabbitMQSender
 {
-    public class RabbitMQAuthMessageSender : IRabbitMQAuthMessageSender
+    public class RabbmitMQOrderMessageSender : IRabbmitMQOrderMessageSender
     {
         public readonly string _hostName;
         public readonly string _username;
@@ -12,24 +12,24 @@ namespace Mango.Services.AuthAPI.RabbitMQSender
 
         private IConnection _connection;
 
-        public RabbitMQAuthMessageSender()
+        public RabbmitMQOrderMessageSender()
         {
             _hostName = "localhost";
             _username = "guest";
             _password = "guest";
         }
 
-        public void SendMessage(object message, string queueName)
+        public void SendMessage(object message, string exchangeName)
         {
 
             if (ConnectionExists())
             {
 
                 using var channel = _connection.CreateModel();
-                channel.QueueDeclare(queueName, false, false, false, null);
+                channel.ExchangeDeclare(exchangeName, ExchangeType.Fanout,durable:false);
                 var json = JsonConvert.SerializeObject(message);
                 var body = Encoding.UTF8.GetBytes(json);
-                channel.BasicPublish(exchange: "", routingKey: queueName, null, body: body);
+                channel.BasicPublish(exchange: exchangeName, "", null, body: body);
             }
 
         }

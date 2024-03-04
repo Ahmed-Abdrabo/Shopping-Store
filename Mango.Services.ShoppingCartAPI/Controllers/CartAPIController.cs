@@ -2,10 +2,12 @@
 using Mango.Services.ShoppingCartAPI.Data;
 using Mango.Services.ShoppingCartAPI.Models;
 using Mango.Services.ShoppingCartAPI.Models.Dto;
+using Mango.Services.ShoppingCartAPI.RabbitMQSender;
 using Mango.Services.ShoppingCartAPI.Service.IService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using System.Reflection.PortableExecutable;
 
 namespace Mango.Services.ShoppingCartAPI.Controllers
@@ -19,15 +21,20 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
         private readonly AppDbContext _db;
         private IProductService _productService;
         private ICouponService _couponService;
+        private readonly IRabbmitMQCartMessageSender _messageBus;
+        private IConfiguration _configuration;
 
         public CartAPIController(IMapper mapper, AppDbContext db,
-            IProductService productService, ICouponService couponService)
+            IProductService productService, ICouponService couponService,
+            IRabbmitMQCartMessageSender messageBus, IConfiguration configuration)
         {
             _response = new ResponseDto();
             _mapper = mapper;
             _db = db;
             _productService = productService;
             _couponService = couponService;
+            _messageBus = messageBus;
+            _configuration = configuration;
         }
 
         [HttpGet("GetCart/{userId}")]
@@ -143,6 +150,22 @@ namespace Mango.Services.ShoppingCartAPI.Controllers
             {
                 _response.Message = ex.Message.ToString();
                 _response.IsSuccess = false;
+            }
+            return _response;
+        }
+
+        [HttpPost("EmailCartRequest")]
+        public async Task<object> EmailCartRequest([FromBody] CartDto cartDto)
+        {
+            try
+            {
+                _messageBus.SendMessage(cartDto, _configuration.GetValue<string>("TopicAndQueueNames:EmailShoppingCartQueue"));
+                _response.Result = true;
+            }
+            catch (Exception ex)
+            {
+                _response.IsSuccess = false;
+                _response.Message = ex.ToString();
             }
             return _response;
         }

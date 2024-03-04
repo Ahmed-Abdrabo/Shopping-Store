@@ -1,9 +1,10 @@
 ﻿using Mango.Web.Models;
+using Mango.Web.Service.IService;
 using Mango.Web.Utility;
 
-namespace Mango.Web.Service.IService
+namespace Mango.Web.Service
 {
-    public class CartService: ICartService
+    public class CartService : ICartService
     {
         private readonly IBaseService _baseService;
         public CartService(IBaseService baseService)
@@ -18,6 +19,16 @@ namespace Mango.Web.Service.IService
                 ApiType = SD.ApiType.POST,
                 Data = cartDto,
                 Url = SD.ShoppingCartAPIBase + "/api/cart/ApplyCoupon"
+            });
+        }
+
+        public async Task<ResponseDto?> EmailCart(CartDto cartDto)
+        {
+            return await _baseService.SendAsync(new RequestDto()
+            {
+                ApiType = SD.ApiType.POST,
+                Data = cartDto,
+                Url = SD.ShoppingCartAPIBase + "/api/cart/EmailCartRequest"
             });
         }
 

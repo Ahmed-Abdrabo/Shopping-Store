@@ -2,9 +2,9 @@
 using RabbitMQ.Client;
 using System.Text;
 
-namespace Mango.Services.AuthAPI.RabbitMQSender
+namespace Mango.Services.ShoppingCartAPI.RabbitMQSender
 {
-    public class RabbitMQAuthMessageSender : IRabbitMQAuthMessageSender
+    public class RabbmitMQCartMessageSender : IRabbmitMQCartMessageSender
     {
         public readonly string _hostName;
         public readonly string _username;
@@ -12,7 +12,7 @@ namespace Mango.Services.AuthAPI.RabbitMQSender
 
         private IConnection _connection;
 
-        public RabbitMQAuthMessageSender()
+        public RabbmitMQCartMessageSender()
         {
             _hostName = "localhost";
             _username = "guest";
